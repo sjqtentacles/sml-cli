@@ -123,6 +123,21 @@ struct
                  (Cli.parse reqSpec ["-z"])
       val () = expectErr "non-int value" "expects an integer"
                  (Cli.parse reqSpec ["-o", "f", "--num", "abc"])
+      (* An oversized --opt value must not overflow the default `int`:
+         Int.fromString raises Overflow past 2^31 on a 32-bit int (MLton) but
+         accepts it on a 63-bit int (Poly/ML). The parser bounds it, so an
+         out-of-range value takes the same "expects an integer" error path
+         byte-identically on both compilers. *)
+      val () = expectErr "oversized int value (12 digits)" "expects an integer"
+                 (Cli.parse reqSpec ["-o", "f", "--num", "999999999999"])
+      val () = expectErr "int value at 2^31" "expects an integer"
+                 (Cli.parse reqSpec ["-o", "f", "--num", "2147483648"])
+      val () = check "oversized int value does not raise"
+                 ((Cli.parse reqSpec ["-o", "f", "--num", "999999999999"]; true)
+                  handle _ => false)
+      val () = withOk "in-range int value still parses"
+                 (Cli.parse reqSpec ["-o", "f", "--num", "42"])
+                 (fn r => checkInt "num is 42" (42, Option.getOpt (Cli.getInt r "num", ~1)))
       val () = expectErr "missing value" "requires a value"
                  (Cli.parse reqSpec ["-o", "f", "--num"])
 

@@ -51,7 +51,9 @@ For Poly/ML, `use` the `cli.sig` and `cli.sml` sources in order.
 | `cmd ...` | a leading subcommand name dispatches to its own spec |
 
 Unknown options, missing required options, and ill-typed values are reported
-as a distinguished `Err message`.
+as a distinguished `Err message`. An `intOpt` value is bounded to the signed
+32-bit range, so an oversized number is an `Err` ("expects an integer")
+identically on MLton and Poly/ML rather than overflowing the default `int`.
 
 ## Usage
 
