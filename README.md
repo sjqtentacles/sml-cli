@@ -112,6 +112,50 @@ val ["x"]   = positionals r
 | `get : result -> string -> value option` | Raw tagged lookup by long name. |
 | `usage : spec -> string` | Deterministic help/usage text. |
 
+## Example
+
+`make example` builds and runs [`examples/demo.sml`](examples/demo.sml), which
+declares a `deploy` spec with a `rollback` subcommand, parses three literal
+argument lists (a full success, a subcommand dispatch, and a missing-required
+error), and prints the generated usage text (output is byte-identical under
+MLton and Poly/ML):
+
+```
+Parsing: --env prod -v --tag release --tag hotfix extra1
+  command     = []
+  positionals = [extra1]
+  verbose     = true
+  force       = false
+  env         = prod
+  retries     = 3
+  tags        = [release,hotfix]
+
+Parsing: rollback --force
+  command     = [rollback]
+  positionals = []
+  verbose     = false
+  force       = true
+  env         = (none)
+  retries     = (none)
+  tags        = []
+
+Parsing: -v (missing required --env)
+  ERROR: missing required option --env
+
+Usage:
+deploy - ship a build to an environment
+usage: deploy [options] <command>
+
+options:
+  -v, --verbose  enable verbose output
+  -e, --env <str>  target environment
+      --retries <int>  number of retries
+  -t, --tag <str>...  attach a tag (repeatable)
+
+commands:
+  rollback  roll back to the previous release
+```
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
